@@ -15,7 +15,6 @@ use Spryker\Yves\EventDispatcher\Plugin\Application\EventDispatcherApplicationPl
 use Spryker\Yves\Kernel\AbstractPlugin;
 use Symfony\Bridge\Twig\Extension\CodeExtension;
 use Symfony\Bridge\Twig\Extension\ProfilerExtension;
-use Symfony\Bundle\WebProfilerBundle\Controller\ExceptionController;
 use Symfony\Bundle\WebProfilerBundle\Controller\ExceptionPanelController;
 use Symfony\Bundle\WebProfilerBundle\Controller\ProfilerController;
 use Symfony\Bundle\WebProfilerBundle\Controller\RouterController;
@@ -255,17 +254,9 @@ class WebProfilerApplicationPlugin extends AbstractPlugin implements Application
         };
 
         $exceptionController = function () use ($container) {
-            if (class_exists(ExceptionPanelController::class)) {
-                return new ExceptionPanelController(
-                    new HtmlErrorRenderer($container->get('debug')),
-                    $container->get(static::SERVICE_PROFILER),
-                );
-            }
-
-            return new ExceptionController(
+            return new ExceptionPanelController(
+                new HtmlErrorRenderer($container->get('debug')),
                 $container->get(static::SERVICE_PROFILER),
-                $container->get(static::SERVICE_TWIG),
-                $container->get('debug'),
             );
         };
 
@@ -327,7 +318,7 @@ class WebProfilerApplicationPlugin extends AbstractPlugin implements Application
         $twigService = $container->get(static::SERVICE_TWIG);
 
         $dispatcher->addSubscriber(new ProfilerListener($profilerService, $requestStack, null, false, false));
-        $dispatcher->addSubscriber(new WebDebugToolbarListener($twigService, false, WebDebugToolbarListener::ENABLED));
+        $dispatcher->addSubscriber(new WebDebugToolbarListener($twigService, false, WebDebugToolbarListener::ENABLED, new WebDebugToolbarUrlGenerator()));
 
         /** @var \Symfony\Component\EventDispatcher\EventSubscriberInterface $requestService */
         $requestService = $profilerService->get(static::SERVICE_REQUEST);
