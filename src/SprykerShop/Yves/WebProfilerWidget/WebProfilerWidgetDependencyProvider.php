@@ -43,11 +43,6 @@ class WebProfilerWidgetDependencyProvider extends AbstractBundleDependencyProvid
         return $container;
     }
 
-    /**
-     * @param \Spryker\Yves\Kernel\Container $container
-     *
-     * @return \Spryker\Yves\Kernel\Container
-     */
     protected function addDataCollectorPlugins(Container $container): Container
     {
         $container->set(static::PLUGINS_DATA_COLLECTORS, function () {
