@@ -17,12 +17,18 @@
         "spryker/code-sniffer": "*",
         "spryker/container": "*",
         "spryker/event-dispatcher": "*",
-        "spryker/silex": "*"
+        "spryker/log": "*",
+        "spryker/monolog": "*",
+        "spryker/silex": "*",
+        "symfony/monolog-bridge": "*"
     },
     "suggest": {
         "spryker/container": "Add this module when using plugins from this module.",
         "spryker/event-dispatcher": "Add this module when using plugins from this module.",
-        "spryker/silex": "Add this module when using plugins that need Silex dependencies."
+        "spryker/log": "Add this module when using WebProfilerLoggerDataCollectorPlugin from this module.",
+        "spryker/monolog": "Add this module when using WebProfilerLoggerDataCollectorPlugin from this module.",
+        "spryker/silex": "Add this module when using plugins that need Silex dependencies.",
+        "symfony/monolog-bridge": "Add this module when using WebProfilerLoggerDataCollectorPlugin from this module."
     },
     "autoload": {
         "psr-4": {
