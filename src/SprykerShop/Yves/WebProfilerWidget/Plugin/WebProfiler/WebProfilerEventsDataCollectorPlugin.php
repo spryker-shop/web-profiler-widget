@@ -10,20 +10,14 @@ namespace SprykerShop\Yves\WebProfilerWidget\Plugin\WebProfiler;
 use Spryker\Service\Container\ContainerInterface;
 use Spryker\Shared\WebProfilerExtension\Dependency\Plugin\WebProfilerDataCollectorPluginInterface;
 use Spryker\Yves\EventDispatcher\Plugin\Application\EventDispatcherApplicationPlugin;
+use SprykerShop\Yves\WebProfilerWidget\DataCollector\WebProfilerEventDataCollector;
 use Symfony\Component\HttpKernel\DataCollector\DataCollectorInterface;
-use Symfony\Component\HttpKernel\DataCollector\EventDataCollector;
 
 class WebProfilerEventsDataCollectorPlugin implements WebProfilerDataCollectorPluginInterface
 {
-    /**
-     * @var string
-     */
-    protected const NAME = 'events';
+    protected const string NAME = 'events';
 
-    /**
-     * @var string
-     */
-    protected const TEMPLATE = '@WebProfiler/Collector/events.html.twig';
+    protected const string TEMPLATE = '@WebProfiler/Collector/events.html.twig';
 
     /**
      * {@inheritDoc}
@@ -51,7 +45,7 @@ class WebProfilerEventsDataCollectorPlugin implements WebProfilerDataCollectorPl
 
     /**
      * {@inheritDoc}
-     * - Adds a EventDataCollector which collects information about the triggered events.
+     * - Adds a WebProfilerEventDataCollector which collects information about the triggered events.
      *
      * @api
      *
@@ -61,6 +55,6 @@ class WebProfilerEventsDataCollectorPlugin implements WebProfilerDataCollectorPl
      */
     public function getDataCollector(ContainerInterface $container): DataCollectorInterface
     {
-        return new EventDataCollector($container->get(EventDispatcherApplicationPlugin::SERVICE_DISPATCHER));
+        return new WebProfilerEventDataCollector($container->get(EventDispatcherApplicationPlugin::SERVICE_DISPATCHER));
     }
 }
