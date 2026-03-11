@@ -13,6 +13,7 @@ use Spryker\Shared\ApplicationExtension\Dependency\Plugin\BootableApplicationPlu
 use Spryker\Shared\EventDispatcher\EventDispatcherInterface;
 use Spryker\Yves\EventDispatcher\Plugin\Application\EventDispatcherApplicationPlugin;
 use Spryker\Yves\Kernel\AbstractPlugin;
+use SprykerShop\Yves\WebProfilerWidget\DataCollector\WebProfilerSessionDataCollector;
 use Symfony\Bridge\Twig\Extension\CodeExtension;
 use Symfony\Bridge\Twig\Extension\ProfilerExtension;
 use Symfony\Bundle\WebProfilerBundle\Controller\ExceptionPanelController;
@@ -22,9 +23,12 @@ use Symfony\Bundle\WebProfilerBundle\EventListener\WebDebugToolbarListener;
 use Symfony\Bundle\WebProfilerBundle\Twig\WebProfilerExtension;
 use Symfony\Cmf\Component\Routing\ChainRouter;
 use Symfony\Component\ErrorHandler\ErrorRenderer\HtmlErrorRenderer;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface as SymfonyEventDispatcherInterface;
+use Symfony\Component\HttpFoundation\Session\FlashBagAwareSessionInterface;
 use Symfony\Component\HttpKernel\DataCollector\RouterDataCollector;
 use Symfony\Component\HttpKernel\Debug\FileLinkFormatter;
 use Symfony\Component\HttpKernel\Debug\TraceableEventDispatcher;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\EventListener\ProfilerListener;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
@@ -70,6 +74,8 @@ class WebProfilerApplicationPlugin extends AbstractPlugin implements Application
      * @var string
      */
     public const SERVICE_REQUEST_STACK = 'request_stack';
+
+    protected const string SERVICE_SESSION = 'session';
 
     /**
      * @var string
@@ -308,6 +314,39 @@ class WebProfilerApplicationPlugin extends AbstractPlugin implements Application
             $dispatcher->addListener(KernelEvents::CONTROLLER, [$routerDataCollector, 'onKernelController']);
         }
 
+        $this->addFlashMessageListener($dispatcher, $profilerService);
+
         return $container;
+    }
+
+    protected function addFlashMessageListener(
+        SymfonyEventDispatcherInterface $dispatcher,
+        Profiler $profilerService,
+    ): void {
+        $sessionCollector = $profilerService->get(static::SERVICE_SESSION);
+
+        if (!$sessionCollector instanceof WebProfilerSessionDataCollector) {
+            return;
+        }
+
+        $dispatcher->addListener(KernelEvents::REQUEST, function (RequestEvent $event) use ($sessionCollector): void {
+            if (!$event->isMainRequest()) {
+                return;
+            }
+
+            $request = $event->getRequest();
+
+            if (!$request->hasSession() || !$request->getSession()->isStarted()) {
+                return;
+            }
+
+            $session = $request->getSession();
+
+            if (!$session instanceof FlashBagAwareSessionInterface) {
+                return;
+            }
+
+            $sessionCollector->setIncomingFlashes($session->getFlashBag()->peekAll());
+        });
     }
 }
