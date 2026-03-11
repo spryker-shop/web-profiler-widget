@@ -34,6 +34,7 @@ class WebProfilerWidgetConfig extends AbstractBundleConfig
         $reflectionClass = new ReflectionClass(WebDebugToolbarListener::class);
 
         return [
+            __DIR__ . '/Presentation',
             dirname(dirname((string)$reflectionClass->getFileName())) . '/Resources/views',
         ];
     }

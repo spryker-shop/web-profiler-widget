@@ -22,9 +22,11 @@ use Symfony\Bundle\WebProfilerBundle\EventListener\WebDebugToolbarListener;
 use Symfony\Bundle\WebProfilerBundle\Twig\WebProfilerExtension;
 use Symfony\Cmf\Component\Routing\ChainRouter;
 use Symfony\Component\ErrorHandler\ErrorRenderer\HtmlErrorRenderer;
+use Symfony\Component\HttpKernel\DataCollector\RouterDataCollector;
 use Symfony\Component\HttpKernel\Debug\FileLinkFormatter;
 use Symfony\Component\HttpKernel\Debug\TraceableEventDispatcher;
 use Symfony\Component\HttpKernel\EventListener\ProfilerListener;
+use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\Routing\Loader\ClosureLoader;
 use Symfony\Component\Routing\Route;
@@ -89,11 +91,13 @@ class WebProfilerApplicationPlugin extends AbstractPlugin implements Application
     public const SERVICE_CHARSET = 'charset';
 
     /**
-     * @uses \Spryker\Zed\EventDispatcher\Communication\Plugin\Application\EventDispatcherApplicationPlugin::SERVICE_DISPATCHER
+     * @uses \Spryker\Yves\EventDispatcher\Plugin\Application\EventDispatcherApplicationPlugin::SERVICE_DISPATCHER
      *
      * @var string
      */
     public const SERVICE_DISPATCHER = 'dispatcher';
+
+    protected const string SERVICE_DATA_COLLECTOR_ROUTER = 'router';
 
     /**
      * @var int
@@ -206,7 +210,7 @@ class WebProfilerApplicationPlugin extends AbstractPlugin implements Application
     /**
      * @param \Spryker\Service\Container\ContainerInterface $container
      *
-     * @return array<mixed>
+     * @return array<array<mixed>>
      */
     protected function getRouteDefinitions(ContainerInterface $container): array
     {
@@ -297,6 +301,12 @@ class WebProfilerApplicationPlugin extends AbstractPlugin implements Application
         /** @var \Symfony\Component\EventDispatcher\EventSubscriberInterface $requestService */
         $requestService = $profilerService->get(static::SERVICE_REQUEST);
         $dispatcher->addSubscriber($requestService);
+
+        $routerDataCollector = $profilerService->get(static::SERVICE_DATA_COLLECTOR_ROUTER);
+
+        if ($routerDataCollector instanceof RouterDataCollector) {
+            $dispatcher->addListener(KernelEvents::CONTROLLER, [$routerDataCollector, 'onKernelController']);
+        }
 
         return $container;
     }
