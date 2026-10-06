@@ -14,11 +14,13 @@ use Symfony\Component\Form\FormFactoryBuilderInterface;
 
 /**
  * @method \SprykerShop\Yves\WebProfilerWidget\WebProfilerWidgetFactory getFactory()
+ * @method \SprykerShop\Yves\WebProfilerWidget\WebProfilerWidgetConfig getConfig()
  */
 class WebProfilerFormPlugin extends AbstractPlugin implements FormPluginInterface
 {
     /**
      * {@inheritDoc}
+     * - Does nothing when the web profiler is disabled.
      * - Adds `Symfony\Component\Form\Extension\DataCollector\Proxy\ResolvedTypeFactoryDataCollectorProxy` as resolved type factory.
      * - Adds `Symfony\Component\Form\Extension\DataCollector\Type\DataCollectorTypeExtension` to type extensions.
      *
@@ -31,6 +33,10 @@ class WebProfilerFormPlugin extends AbstractPlugin implements FormPluginInterfac
      */
     public function extend(FormFactoryBuilderInterface $formFactoryBuilder, ContainerInterface $container): FormFactoryBuilderInterface
     {
+        if (!$this->getConfig()->isWebProfilerEnabled()) {
+            return $formFactoryBuilder;
+        }
+
         $formFactoryBuilder->setResolvedTypeFactory($this->getFactory()->createResolvedTypeFactoryDataCollectorProxy());
         $formFactoryBuilder->addTypeExtension($this->getFactory()->createDataCollectorTypeExtension());
 
