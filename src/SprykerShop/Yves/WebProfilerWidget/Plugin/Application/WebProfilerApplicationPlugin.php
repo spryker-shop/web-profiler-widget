@@ -31,10 +31,6 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\EventListener\ProfilerListener;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
-use Symfony\Component\Routing\Loader\ClosureLoader;
-use Symfony\Component\Routing\Route;
-use Symfony\Component\Routing\RouteCollection;
-use Symfony\Component\Routing\Router;
 use Symfony\Component\Routing\RouterInterface;
 use Twig\Environment;
 
@@ -230,24 +226,11 @@ class WebProfilerApplicationPlugin extends AbstractPlugin implements Application
 
     protected function getRouter(ContainerInterface $container): RouterInterface
     {
-        $loader = new ClosureLoader();
-
-        $resource = function () use ($container) {
-            $routeCollection = new RouteCollection();
-            foreach ($this->getRouteDefinitions($container) as $routeDefinition) {
-                [$pathinfo, $controller, $routeName] = $routeDefinition;
-
-                $route = new Route($pathinfo);
-                $route->setMethods('GET');
-                $route->setDefault('_controller', $controller);
-
-                $routeCollection->add($routeName, $route, 0);
-            }
-
-            return $routeCollection;
-        };
-
-        return new Router($loader, $resource, []);
+        return $this->getFactory()
+            ->createWebProfilerRouterBuilder()
+            ->buildRouter(function () use ($container): array {
+                return $this->getRouteDefinitions($container);
+            });
     }
 
     protected function createProfilerController(ContainerInterface $container): ProfilerController

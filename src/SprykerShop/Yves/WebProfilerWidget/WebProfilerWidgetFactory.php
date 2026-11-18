@@ -10,6 +10,7 @@ namespace SprykerShop\Yves\WebProfilerWidget;
 use Spryker\Shared\Twig\Loader\FilesystemLoader;
 use Spryker\Shared\Twig\Loader\FilesystemLoaderInterface;
 use Spryker\Yves\Kernel\AbstractFactory;
+use SprykerShop\Yves\WebProfilerWidget\Router\WebProfilerRouterBuilder;
 use Symfony\Component\Form\Extension\DataCollector\FormDataCollector;
 use Symfony\Component\Form\Extension\DataCollector\FormDataCollectorInterface;
 use Symfony\Component\Form\Extension\DataCollector\FormDataExtractor;
@@ -51,6 +52,11 @@ class WebProfilerWidgetFactory extends AbstractFactory
     public function getDataCollectorPlugins(): array
     {
         return $this->getProvidedDependency(WebProfilerWidgetDependencyProvider::PLUGINS_DATA_COLLECTORS);
+    }
+
+    public function createWebProfilerRouterBuilder(): WebProfilerRouterBuilder
+    {
+        return new WebProfilerRouterBuilder();
     }
 
     public function createStopwatch(): Stopwatch
